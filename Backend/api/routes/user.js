@@ -8,7 +8,7 @@ var md_auth = require('../middlewares/authenticated'); //se importa el middlewar
 
 //rutas de cada metodo en los controladores
 api.get('/home', UserController.home);
-api.get('/pruebas', UserController.pruebas);
+api.get('/pruebas', md_auth.ensureAuth, UserController.pruebas);
 api.post('/register', UserController.saveUser);
 api.post('/login', UserController.loginUser);
 
