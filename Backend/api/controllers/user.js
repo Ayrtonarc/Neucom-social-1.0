@@ -99,14 +99,27 @@ function loginUser(req, res){
             return res.status(404).send({message: 'Error el usuario no se ha podido identificar'});
         }
     });
-
-    
 }
+//Conseguir datos de un usuario
+
+function getUser(req, res){
+    var userId = req.params.id; //cuando llegan datos por url se usa params, si es por put o post es body }
+
+    User.findById(userId, (err, user) => {
+        if(err) return res.status(500).send({message: 'Error en la peticion'});
+
+        if(!user) return res.status(404).send({message: 'El usuario no existe'});
+
+        return res.status(200).send({user});
+    });
+
+    }
 
 module.exports = {   //todos los metodos creados se tienen que exportar en routes
     home,
     pruebas,
     saveUser,
-    loginUser
+    loginUser,
+    getUser
     
 }
