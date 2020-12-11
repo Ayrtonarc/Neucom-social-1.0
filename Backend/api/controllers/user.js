@@ -139,12 +139,35 @@ function getUser(req, res){
         });
     }
 
+    //Edicion de los datos del usuario
+
+    function updateUser(req, res){
+        var userId = req.params.id;
+        var update = req.body;
+
+        //borrar la propiedad password
+        delete update.password;
+
+        if(userId != req.user.sub){
+            return res.status(500).send({message: "No puedes actualizar datos del usuario"});
+        }
+
+        User.findByIdAndUpdate(userId, update, {new: true}, (err, userUpdated) => {
+            if(err) return res.status(500).send({message:"Error en la peticion"});
+
+            if(!updateUser) return res.status(400).send({message: "No se ha podido actualizar el usuario"});
+
+            return res.status(200).send({user: userUpdated});
+        }); 
+    }
+
 module.exports = {   //todos los metodos creados se tienen que exportar en routes
     home,
     pruebas,
     saveUser,
     loginUser,
     getUser,
-    getUsers
+    getUsers,
+    updateUser
     
 }
