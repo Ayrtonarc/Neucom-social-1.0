@@ -2,6 +2,7 @@
 
 var bcrypt = require('bcrypt-nodejs');
 var mongoosePaginate = require('mongoose-pagination');
+var fs = require('fs');
 
 var User = require('../models/user');
 var jwt = require('../services/jwt'); //se importa el servicio de JWT
@@ -161,6 +162,55 @@ function getUser(req, res){
         }); 
     }
 
+    //Subir archivos de imagen
+    function uploadImage(req, res){
+        var userId = req.params.id;
+      
+      
+        if(req.files){
+          var file_path = req.files.image.path;
+          console.log(file_path);
+          var file_split = file_path.split('\\');
+          console.log(file_split);
+      
+          var file_name = file_split[2]; //para que de el nombre de la imagen y se pueda guardar en laBD
+          console.log(file_name);
+      
+          var ext_split = file_name.split('\.'); //para cortar el string por el punto
+          console.log(ext_split);
+      
+          var file_ext = ext_split[1];
+          console.log(file_ext);
+      
+          if(userId != req.user.sub){
+            return removeFilesOfUploads(res, file_path, 'No tienes permiso para actualizar los datos del usuario');
+      
+          }
+      
+          if(file_ext == 'png' || file_ext == 'jpg' || file_ext == 'jpeg' || file_ext == 'gif'){
+            //Actualizar documento de usuario logueado
+            User.findByIdAndUpdate(userId,{image: file_name},{new:true},(err, userUpdated) => {
+              if(err) return res.status(500).send({message: 'Error en la peticion'});
+      
+              if(!userUpdated) return res.status(404).send({message: 'No se ha podido actualizar el usuario'});
+      
+              return res.status(200).send({userUpdated});
+            });
+          }else{
+          return  removeFilesOfUploads(res, file_path, 'Extencion no valida');
+          }
+      
+        }else{
+          return res.status(200).send({message:'No se han subido imagenes'});
+        }
+      
+      }
+
+
+
+
+
+
 module.exports = {   //todos los metodos creados se tienen que exportar en routes
     home,
     pruebas,
@@ -168,6 +218,7 @@ module.exports = {   //todos los metodos creados se tienen que exportar en route
     loginUser,
     getUser,
     getUsers,
-    updateUser
+    updateUser,
+    uploadImage
     
 }
